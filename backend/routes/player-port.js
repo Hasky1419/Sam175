@@ -102,12 +102,10 @@ router.get('/iframe', async (req, res) => {
     } else if (userLogin && userLogin !== 'usuario') {
       // Playlist específica
       try {
+        // SEMPRE usar URL padrão do Wowza para qualquer live ativa
         const wowzaHost = 'stmv1.udicast.com';
-        // Definir URL padrão OBS
         videoUrl = `https://${wowzaHost}/${userLogin}/${userLogin}/playlist.m3u8`;
-
-        title = `Stream OBS - ${userLogin}`;
-
+        title = `Stream: ${userLogin}`;
         isLive = true;
       } catch (error) {
         console.error('Erro ao buscar playlist específica:', error);
@@ -117,10 +115,10 @@ router.get('/iframe', async (req, res) => {
       }
     }
 
-
     if (!videoUrl && userLogin && userLogin !== 'usuario') {
       try {
         const wowzaHost = 'stmv1.udicast.com';
+        // URL padrão sempre aponta para o stream do usuário
         videoUrl = `https://${wowzaHost}/${userLogin}/${userLogin}/playlist.m3u8`;
         title = `Stream: ${userLogin}`;
         isLive = true;
@@ -177,14 +175,12 @@ router.get('/iframe', async (req, res) => {
       isLive = true;
     }
 
-
     console.log('🎬 Player URL construída:', {
       videoUrl,
       title,
       isLive,
       userLogin,
-      hasPlaylistTransmission: false,
-      hasOBSTransmission: false
+      wowzaUrl: videoUrl
     });
 
     // Gerar HTML do player

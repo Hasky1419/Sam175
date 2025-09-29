@@ -207,27 +207,27 @@ const Dashboard: React.FC = () => {
         const data = await response.json();
         setStreamStatus(data);
         
-        // Definir URL do player e nome baseado no status
+        // SEMPRE usar URL padrão do Wowza quando há live ativa
         if (data.is_live) {
+          // SEMPRE usar URL padrão do Wowza: https://stmv1.udicast.com/(usuario)/(usuario)/playlist.m3u8
+          const baseUrl = window.location.protocol === 'https:' 
+            ? `https://${window.location.hostname}:3001`
+            : `http://${window.location.hostname}:3001`;
+          
+          // URL do player iframe que sempre aponta para a URL correta do Wowza
+          setCurrentVideoUrl(`${baseUrl}/api/player-port/iframe?login=${userLogin}&player=1&contador=true&compartilhamento=true`);
+          
+          // Definir nome baseado no tipo de transmissão
           if (data.stream_type === 'obs' && data.obs_stream?.is_live) {
-            // Para OBS, usar URL do player na porta do sistema
-            const baseUrl = window.location.protocol === 'https:' 
-              ? `https://${window.location.hostname}:3001`
-              : `http://${window.location.hostname}:3001`;
-            setCurrentVideoUrl(`${baseUrl}/api/player-port/iframe?login=${userLogin}&player=1&contador=true`);
             setPlaylistName(`📡 OBS: ${data.obs_stream.streamName || `${userLogin}_live`}`);
           } else if (data.transmission) {
-            // Para playlist, usar URL do player na porta do sistema
-            const baseUrl = window.location.protocol === 'https:' 
-              ? `https://${window.location.hostname}:3001`
-              : `http://${window.location.hostname}:3001`;
-            setCurrentVideoUrl(`${baseUrl}/api/player-port/iframe?login=${userLogin}&playlist=${data.transmission.codigo_playlist}&player=1&contador=true&compartilhamento=true`);
-            
-            // Usar nome da playlist da resposta
             setPlaylistName(data.transmission.playlist_nome ? 
               `📺 Playlist: ${data.transmission.playlist_nome}` : 
               data.transmission.titulo);
+          } else {
+            setPlaylistName(`📺 Transmissão: ${userLogin}`);
           }
+          
           setShowPlayer(true);
           setPlayerError(null);
         } else {
